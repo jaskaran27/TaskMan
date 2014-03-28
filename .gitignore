@@ -1,2 +1,3 @@
+venv
 *.pyc
 TaskMan/settings_local.py
