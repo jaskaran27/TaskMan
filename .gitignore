@@ -1,2 +1,2 @@
 *.pyc
-TaskMan/settings.py
+TaskMan/settings_local.py
