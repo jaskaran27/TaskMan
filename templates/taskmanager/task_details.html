@@ -1,0 +1,57 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Task Manager - Task Details - {{ task.name }}</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="/tasks/">Task Manager</a>
+				</div>
+				<div class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+						<li class="active"><a href="/tasks/">Tasks</a></li>
+					</ul>
+					<ul class="nav navbar-nav navbar-right">
+						<li class="active"><a href="/logout/">Logout</a></li>
+					</ul>
+				</div><!--/.nav-collapse -->
+			</div>
+		</div>
+		<div class="container" style="margin-top:70px;">
+			<h2>Task Details</h2>
+			<br>
+			<ul class="list-group">
+				<li class="list-group-item list-group-item-info"><strong>Name : </strong>{{ task.name }}</li>
+				<li class="list-group-item list-group-item-info"><strong>Date Added : </strong> {{ task.date_added }}</li>
+				<li class="list-group-item list-group-item-info"><strong>Deadline : </strong> {{ task.deadline }}</li>
+				{% if task.date_completed %}
+				<li class="list-group-item list-group-item-info"><strong>Date Completed : </strong> {{ task.date_completed }}</li>
+				{% endif %}
+			</ul>
+			<br>
+			<form action="" method="post">
+				{% csrf_token %}
+				{% if task.date_completed %}
+				<button type="submit" name="incomplete" class="btn btn-default" style = "float:left;">Mark as Incomplete</button>
+				{% else %}
+				<button type="submit" name="complete" class="btn btn-default" style = "float:left;">Mark as Complete</button>
+				{% endif %}
+				<button type="submit" name="delete" class="btn btn-default" style = "float:left; margin-left:23px;">Delete Task</button>
+			</form>
+			
+		</div>
+	</body>
+</html>
