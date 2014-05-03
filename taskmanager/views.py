@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django import forms
@@ -7,6 +7,8 @@ from taskmanager.models import MyUserManager, MyUser, Task, Feed
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 import datetime
+from tasks import add_feed, delete_feed, complete_feed, user_login
+
 
 # Create your views here.
 def landing(request):
@@ -19,6 +21,7 @@ def auth_login(request):
 		user = authenticate(email=email, password=password)
 		if user is not None:
 			login(request, user)
+			user_login.delay(email)
 			return HttpResponseRedirect("/tasks/")
 		else:			
 			return HttpResponse('Invalid login.')
@@ -35,6 +38,7 @@ def register(request):
 			new_user = form.save()
 			new_user = authenticate(email=request.POST['email'], password=request.POST['password1'])
 			login(request, new_user)
+			user_login.delay(str(request.POST['email']))
 			return HttpResponseRedirect("/tasks/")
 	else:
 		form = UserCreationForm()
@@ -83,8 +87,9 @@ def add_task(request):
 		if deadline >= today:
 			task = Task(user=request.user, name=name, deadline=deadline)
 			task.save()
-			feed = Feed(user=request.user, activity='You added task: '+ task.name)
-			feed.save()
+			add_feed.delay(request.user, task.name)
+			#feed = Feed(user=request.user, activity='You added task: '+ task.name)
+			#feed.save()
 			return HttpResponseRedirect(reverse('tasks'))
 		else:
 			return HttpResponse('Deadline cannot be before current date.')
@@ -92,7 +97,7 @@ def add_task(request):
 
 @login_required
 def task_details(request, task_id):
-	task = Task.objects.get(id=task_id)
+	task = get_object_or_404(Task, id=task_id)
 	if request.user != task.user:
 		return HttpResponse("You don't have permission to view this task.")
 	if request.method == 'POST':
@@ -100,17 +105,20 @@ def task_details(request, task_id):
 			task.completed = True
 			task.date_completed = datetime.date.today()
 			task.save()
-			feed = Feed(user=request.user, activity='You completed task: '+ task.name)
-			feed.save()
+			complete_feed.delay(request.user, task.name)
+			#feed = Feed(user=request.user, activity='You completed task: '+ task.name)
+			#feed.save()
 		elif 'incomplete' in request.POST:
 			task.completed = False
 			task.date_completed = None
 			task.save()
-			feed = Feed(user=request.user, activity='You added task: '+ task.name)
-			feed.save()
+			add_feed.delay(request.user, task.name)
+			#feed = Feed(user=request.user, activity='You added task: '+ task.name)
+			#feed.save()
 		elif 'delete' in request.POST:
 			task.delete()
-			feed = Feed(user=request.user, activity='You deleted task: '+ task.name)
-			feed.save()
+			delete_feed.delay(request.user, task.name)
+			#feed = Feed(user=request.user, activity='You deleted task: '+ task.name)
+			#feed.save()
 			return HttpResponseRedirect(reverse('tasks'))
 	return render(request, 'taskmanager/task_details.html', {'task': task})

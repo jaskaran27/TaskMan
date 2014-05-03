@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'taskmanager',
+    'djcelery',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -108,3 +109,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     root('static'),
 )
+
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
